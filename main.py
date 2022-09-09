@@ -1,4 +1,4 @@
-"""Visualize my way to ****ing"""
+"""Visualize my way to *******"""
 import pandas as pd
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
