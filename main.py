@@ -30,4 +30,5 @@ if __name__ == "__main__":
     plt.plot(y,x,color="blue", linewidth=1)
     plt.axis('off')
     plt.imshow(data)
+    plt.savefig(md.folder.joinpath("result.png"))
     plt.show()
