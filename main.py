@@ -36,5 +36,5 @@ if __name__ == "__main__":
     plt.plot(y,x,color="blue", linewidth=1)
     plt.axis('off')
     plt.imshow(data)
-    plt.savefig(md.folder.joinpath("auto_result.png"))
+    plt.savefig(md.folder.joinpath("auto_result.png"), dpi=600)
     plt.show()
