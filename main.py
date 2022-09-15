@@ -17,9 +17,14 @@ def load_all_tiles(tile_list:list[tuple], zoom=15):
     """load all tiles"""
     for i,tile in enumerate(tile_list):
         lat, lon = sm.num2deg(tile[0]+0.5, tile[1]+0.5, zoom)
+        north, west = sm.num2deg(tile[0]+0, tile[1]+0, zoom)
+        south, east = sm.num2deg(tile[0]+1, tile[1]+1, zoom)
+
+        #round all to 5 digits
+        north, west, south, east = [round(x, 5) for x in [north, west, south, east]]
 
         mao = sm.Map(lat, lon, z=zoom)
-        mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{lat}_{lon}.png"))
+        mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
 
 def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
     """do all the loading, plotting and saving files"""
