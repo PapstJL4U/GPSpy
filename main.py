@@ -5,11 +5,16 @@ from matplotlib import pyplot as plt
 import my_data as md
 import smopy as sm
 
-if __name__ == "__main__":
-    #read gps data from file and
-    # filter to only get latitude and longitude
-    df = pd.read_csv(md.work_csv, sep=',')
-    only_location = tuple(zip(df['lat'], df['lon']))
+def detailed_tiles(locations:tuple = None, zoom=13)->None:
+    """find more detailed tiles"""
+    tile_list = [None]*len(locations)
+    for i, tile in enumerate(locations):
+        tile_list[i] = sm.deg2num(tile[0], tile[1],zoom)
+    
+    print(set(tile_list), len(set(tile_list)))
+
+def plot_my_path(only_location:tuple = None)->None:
+    """do all the loading, plotting and saving files"""
 
     #find the latitude and longitude boundaries of the gps trail
     left, right= min(df['lon']), max(df['lon'])
@@ -38,3 +43,13 @@ if __name__ == "__main__":
     plt.imshow(data)
     plt.savefig(md.folder.joinpath("auto_result.png"), dpi=600)
     plt.show()
+
+if __name__ == "__main__":
+    #read gps data from file and
+    # filter to only get latitude and longitude
+    df = pd.read_csv(md.work_csv, sep=',')
+    only_location = tuple(zip(df['lat'], df['lon']))
+    detailed_tiles(only_location, zoom=15)
+    detailed_tiles(only_location, zoom=13)
+    detailed_tiles(only_location, zoom=5)
+    #plot_my_path(only_location)
