@@ -5,15 +5,23 @@ from matplotlib import pyplot as plt
 import my_data as md
 import smopy as sm
 
-def detailed_tiles(locations:tuple = None, zoom=13)->None:
-    """find more detailed tiles"""
+def detailed_tiles(locations:tuple = None, zoom=15)->set:
+    """find the unique list of tiles for all locations"""
     tile_list = [None]*len(locations)
     for i, tile in enumerate(locations):
         tile_list[i] = sm.deg2num(tile[0], tile[1],zoom)
-    
     print(set(tile_list), len(set(tile_list)))
+    return (set(tile_list))
 
-def plot_my_path(only_location:tuple = None)->None:
+def load_all_tiles(tile_list:list[tuple], zoom=15):
+    """load all tiles"""
+    for i,tile in enumerate(tile_list):
+        lat, lon = sm.num2deg(tile[0]+0.5, tile[1]+0.5, zoom)
+
+        mao = sm.Map(lat, lon, z=zoom)
+        mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{lon}_{lat}.png"))
+
+def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
     """do all the loading, plotting and saving files"""
 
     #find the latitude and longitude boundaries of the gps trail
@@ -34,11 +42,11 @@ def plot_my_path(only_location:tuple = None)->None:
     y = [0]*len(location_on_image)
     x = [0]*len(location_on_image)
     for i,pxl in enumerate(location_on_image):
-        y[i] =  int(pxl[0])
-        x[i] =  int(pxl[1])
+        x[i] =  int(pxl[0])
+        y[i] =  int(pxl[1])
 
     data = mimage.imread(md.map_png)
-    plt.plot(y,x,color="blue", linewidth=1)
+    plt.plot(x,y,color="blue", linewidth=1)
     plt.axis('off')
     plt.imshow(data)
     plt.savefig(md.folder.joinpath("auto_result.png"), dpi=600)
@@ -48,8 +56,7 @@ if __name__ == "__main__":
     #read gps data from file and
     # filter to only get latitude and longitude
     df = pd.read_csv(md.work_csv, sep=',')
-    only_location = tuple(zip(df['lat'], df['lon']))
-    detailed_tiles(only_location, zoom=15)
-    detailed_tiles(only_location, zoom=13)
-    detailed_tiles(only_location, zoom=5)
-    #plot_my_path(only_location)
+    only_location = tuple(zip(df['lat'],df['lon']))
+    unique_tiles = detailed_tiles(only_location, zoom=15)
+    load_all_tiles(unique_tiles, zoom=15)
+    #plot_my_path(only_location, df)

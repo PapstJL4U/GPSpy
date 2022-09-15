@@ -11,13 +11,13 @@
             "program": "main.py",
             "console": "integratedTerminal",
             "justMyCode": true
-        }
+        },
 
         {
-            "name": "get_osm.py",
+            "name": "mapbuilder.py",
             "type": "python",
             "request": "launch",
-            "program": "get_osm.py",
+            "program": "mapbuilder.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
