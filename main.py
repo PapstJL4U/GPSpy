@@ -19,7 +19,7 @@ def load_all_tiles(tile_list:list[tuple], zoom=15):
         lat, lon = sm.num2deg(tile[0]+0.5, tile[1]+0.5, zoom)
 
         mao = sm.Map(lat, lon, z=zoom)
-        mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{lon}_{lat}.png"))
+        mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{lat}_{lon}.png"))
 
 def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
     """do all the loading, plotting and saving files"""
@@ -27,7 +27,7 @@ def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
     #find the latitude and longitude boundaries of the gps trail
     left, right= min(df['lon']), max(df['lon'])
     bottom, top = min(df['lat']), max(df['lat'])
-    point = (top, left, bottom, right) 
+    point = (bottom, left, top, right) 
     #point = sm.POINT if you want to define the boundaries yourself.
 
     #load current map from openstreetmaps
@@ -59,4 +59,4 @@ if __name__ == "__main__":
     only_location = tuple(zip(df['lat'],df['lon']))
     unique_tiles = detailed_tiles(only_location, zoom=15)
     load_all_tiles(unique_tiles, zoom=15)
-    #plot_my_path(only_location, df)
+    plot_my_path(only_location, df)

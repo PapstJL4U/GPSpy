@@ -37,7 +37,7 @@ with open(osm_dimension, 'r', newline='') as csvfile:
     del(csvfile)
     del(row)
 
-POINT = (TOP, LEFT, BOTTOM, RIGHT)
+POINT = (BOTTOM, LEFT, TOP, RIGHT)
 
 if __name__ == "__main__":
     for entry in list(locals().values())[-15:]:
