@@ -28,13 +28,13 @@ def build_tile_graph(tile_dic:dict)->None:
     for home in Graph.nodes.items():
         for neighbor in Graph.nodes.items():
             if home != neighbor:
-                if ((home[1]["north"] == neighbor[1]["south"]) or\
-                    (home[1]["south"] == neighbor[1]["north"]))\
+                if ((home[1]["north"] == neighbor[1]["south"])\
+                    or (home[1]["south"] == neighbor[1]["north"]))\
                     and (home[1]["east"] == neighbor[1]["east"]):
                         Graph.add_edge(home[0], neighbor[0], orientation="lat")
 
-                if ((home[1]["west"] == neighbor[1]["east"]) or\
-                    (home[1]["east"] == neighbor[1]["west"]))\
+                if ((home[1]["west"] == neighbor[1]["east"])\
+                    or (home[1]["east"] == neighbor[1]["west"]))\
                     and (home[1]["north"] == neighbor[1]["north"]):
                         Graph.add_edge(home[0], neighbor[0], orientation="lon")
     print(Graph)
