@@ -4,6 +4,7 @@ from matplotlib import image as mimage
 from matplotlib import pyplot as plt
 import my_data as md
 import smopy as sm
+import mapbuilder as mp
 
 def detailed_tiles(locations:tuple = None, zoom=15)->set:
     """find the unique list of tiles for all locations"""
@@ -57,11 +58,45 @@ def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
     plt.savefig(md.folder.joinpath("auto_result.png"), dpi=600)
     plt.show()
 
+def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None:
+    """do all the loading, plotting and saving files"""
+
+    #find the latitude and longitude boundaries of the gps trail
+    left, right= min(df['lon']), max(df['lon'])
+    bottom, top = min(df['lat']), max(df['lat'])
+    point = (bottom, left, top, right) 
+    #point = sm.POINT if you want to define the boundaries yourself.
+
+    #generate and load map from mapbuilder
+    TG = mp.TileGraph()
+    TG.set_coordinates(None, '0')
+    TG.set_positive_coordinates()
+    pathy = TG.drawing()
+    #convert real gps data to pixels on the map
+    location_on_image = list(map(TG.to_pixels, only_location))
+    
+    #matplotlib needs x and y coordinates as distinct list and as integers
+    # x = list of only x coordinates
+    # y = list of only y coordinates
+    y = [0]*len(location_on_image)
+    x = [0]*len(location_on_image)
+    for i,pxl in enumerate(location_on_image):
+        x[i] =  int(pxl[0])
+        y[i] =  int(pxl[1])
+
+    data = mimage.imread(pathy)
+    plt.plot(x,y,color="blue", linewidth=1)
+    plt.axis('off')
+    plt.imshow(data)
+    plt.savefig(md.folder.joinpath("mapbuilder_result.png"), dpi=600)
+    plt.show()
+
 if __name__ == "__main__":
     #read gps data from file and
     # filter to only get latitude and longitude
     df = pd.read_csv(md.work_csv, sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
     unique_tiles = detailed_tiles(only_location, zoom=15)
-    load_all_tiles(unique_tiles, zoom=15)
-    plot_my_path(only_location, df)
+    #load_all_tiles(unique_tiles, zoom=15)
+    #plot_my_path(only_location, df)
+    plot_my_mapbuilder(only_location, df)

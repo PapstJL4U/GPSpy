@@ -1,12 +1,12 @@
 """Loads the tiles, builds a graph and finds the boundaries of the map"""
-from math import cos
+import math
 from PIL import Image as pimage
-from PIL import ImageDrawing as pimdraw
+from PIL import ImageDraw as pimdraw
 import pandas as pd
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
 import my_data as md
-import smopy as sm
+from smopy import deg2num
 import networkx as nx
 import os
 import so_networkx as so
@@ -18,8 +18,14 @@ class TileGraph():
         self.tile_dic = self.load_all_tiles()       
         self.Graph = self.build_tile_graph(self.tile_dic)
         self.max_lat, self.max_lon, self.min_lat, self.min_lon = self.map_boundaries(self.tile_dic)
+        self.zoom = self.tile_dic["0"]["zoom"]
+        self.min_x, self.min_y,  = self.to_pixels((self.min_lat, self.min_lon)) 
+        
         self.average_lat, self.average_lon = self.avg_tile_size_degree(self.tile_dic)
         self.visited = []
+        self.tile_dim = 256
+        self.mla = int(round((self.max_lat-self.min_lat) / self.average_lat,0))
+        self.mlo = int(round((self.max_lon-self.min_lon) / self.average_lon,0))
         
     def load_all_tiles(self)->dict:
         """Build a dictionary of tiles with relevant data"""
@@ -54,11 +60,10 @@ class TileGraph():
                     if (home[1]["east"] == neighbor[1]["west"])\
                         and (home[1]["north"] == neighbor[1]["north"]):
                             Graph.add_edge(neighbor[0], home[0], orientation="West")
-        print(Graph.edges)
+
         pos = nx.spring_layout(Graph)
         nx.draw(Graph, with_labels=True, font_weight='bold', pos=pos, connectionstyle='arc3, rad = 0.5')
         edge_labels = nx.get_edge_attributes(Graph,'orientation')
-        #nx.draw_networkx_edge_labels(Graph, pos, edge_labels = edge_labels)
         so.my_draw_networkx_edge_labels(Graph, pos, edge_labels = edge_labels, rad=0.5)
         #plt.show()
         return Graph
@@ -109,9 +114,9 @@ class TileGraph():
                 Y = self.tile_dic[origin]["Y"]
 
                 if where_from == "North":
-                    Y = self.tile_dic[origin]["Y"]-1   
+                    Y = self.tile_dic[origin]["Y"]+1   
                 elif where_from =="South":
-                    Y = self.tile_dic[origin]["Y"]+1
+                    Y = self.tile_dic[origin]["Y"]-1
                 elif where_from =="East":
                     X = self.tile_dic[origin]["X"]-1
                 elif where_from == "West":
@@ -129,23 +134,44 @@ class TileGraph():
                 smallest_x = tile["X"]
             if tile["Y"]<=smallest_y:
                 smallest_y = tile["Y"]
-        print(smallest_x, smallest_y)
+        
         set_x = abs(smallest_x)
         set_y = abs(smallest_y)
         for _,tile in self.tile_dic.items():
             tile["X"] += set_x
             tile["Y"] += set_y
 
-def drawing(self, mla, mlo, tile_dic:dict)->None:
-    """draw an image with all tiles"""
-    tile_dim = 256
-    target_img = pimage.new('RGBA', (tile_dim*mlo, tile_dim*mla), (192,192,192,0))
+    def drawing(self, name=None)->Path:
+        """draw an image with all tiles"""
+        target_img = pimage.new('RGBA', (self.tile_dim*self.mlo, self.tile_dim*self.mla), (192,192,192,0))
+        for _, tile in self.tile_dic.items():
+            image = pimage.open(md.tiles_folder.joinpath(tile["name"]), 'r')
+            X = tile["X"]
+            Y = tile["Y"]
+            target_img.paste(image, (X*self.tile_dim, Y*self.tile_dim))
+        #target_img.show()
+        z = str(self.tile_dic["0"]["zoom"])
+        if name is None:
+            name = "Combined_Tiles_Zoom_"
+        pathy:Path = md.tiles_folder.joinpath("result", name+z+".png")
+        target_img.save(pathy)
+        
+        return pathy
+
+    def to_pixels(self, lat_lon:tuple):
+        
+        lat, lon = lat_lon
+        zoom = self.zoom
+        x,y = deg2num(lat, lon, zoom=zoom, do_round=False)
+        px = (x - self.min_x) * self.tile_dim
+        py = (y - self.min_y) * self.tile_dim
+        return px,py
+
 
 if __name__ == "__main__":
     TG  = TileGraph()
     #Graph:nx.Graph = TG.build_tile_graph(TG.tile_dic)   
-    mla = int(round((TG.max_lat-TG.min_lat) / TG.average_lat,0))
-    mlo = int(round((TG.max_lon-TG.min_lon) / TG.average_lon,0))
     
     TG.set_coordinates(None, '0')
     TG.set_positive_coordinates()
+    TG.drawing()
