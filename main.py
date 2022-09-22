@@ -17,14 +17,19 @@ def detailed_tiles(locations:tuple = None, zoom=15)->set:
 def load_all_tiles(tile_list:list[tuple], zoom=15):
     """load all tiles"""
     for i,tile in enumerate(tile_list):
+        #find the center of a tile
         lat, lon = sm.num2deg(tile[0]+0.5, tile[1]+0.5, zoom)
+
+        #get the boundaries of the tile
         north, west = sm.num2deg(tile[0]+0, tile[1]+0, zoom)
         south, east = sm.num2deg(tile[0]+1, tile[1]+1, zoom)
 
         #round all to 5 digits
         north, west, south, east = [round(x, 5) for x in [north, west, south, east]]
 
+        #get the single tile based on the center point to allow maximum zoom
         mao = sm.Map(lat, lon, z=zoom)
+        #save the tile with the boudaries and zoom
         mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
 
 def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
@@ -67,25 +72,30 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
     point = (bottom, left, top, right) 
     #point = sm.POINT if you want to define the boundaries yourself.
 
-    #generate and load map from mapbuilder
+    #generate the graph from the tiles_folder
     TG = mp.TileGraph()
+    #The graph is relative and needs Grid-like coordinates
     TG.set_coordinates(None, '0')
+    #Coordinates can be positive and negative, make them all start postive
     TG.set_positive_coordinates()
+    #finally draw the image and save it, return path to image
     pathy = TG.drawing()
+
     #convert real gps data to pixels on the map
     location_on_image = list(map(TG.to_pixels, only_location))
-    
+    #load the detailed image
+    data = mimage.imread(pathy)
+
     #matplotlib needs x and y coordinates as distinct list and as integers
     # x = list of only x coordinates
-    # y = list of only y coordinates
+    # y = list of only y coordinates    
     y = [0]*len(location_on_image)
     x = [0]*len(location_on_image)
     for i,pxl in enumerate(location_on_image):
         x[i] =  int(pxl[0])
-        y[i] =  int(pxl[1])
+        y[i] =  int(data.shape[0] - pxl[1]) #invert coordinates, because its and image
 
-    data = mimage.imread(pathy)
-    plt.plot(x,y,color="blue", linewidth=1)
+    plt.plot(x,y,color="red", linewidth=0.5)
     plt.axis('off')
     plt.imshow(data)
     plt.savefig(md.folder.joinpath("mapbuilder_result.png"), dpi=600)
@@ -97,6 +107,11 @@ if __name__ == "__main__":
     df = pd.read_csv(md.work_csv, sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
     unique_tiles = detailed_tiles(only_location, zoom=15)
+    #download all tiles if not yet downloaded
     #load_all_tiles(unique_tiles, zoom=15)
+    
+    #plot a path within a single tile
     #plot_my_path(only_location, df)
+
+    #plot a path within multiple tiles (by zoom)
     plot_my_mapbuilder(only_location, df)

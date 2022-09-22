@@ -1,3 +1,4 @@
+"""access to all kinds of files and directories"""
 from pathlib import Path
 import csv
 
