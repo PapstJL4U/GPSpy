@@ -14,7 +14,7 @@ def detailed_tiles(locations:tuple = None, zoom=15)->set:
     print(set(tile_list), len(set(tile_list)))
     return (set(tile_list))
 
-def load_all_tiles(tile_list:list[tuple], zoom=15):
+def load_all_tiles(tile_list:list[tuple], zoom:int=15)->None:
     """load all tiles"""
     for i,tile in enumerate(tile_list):
         #find the center of a tile
