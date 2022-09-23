@@ -1,3 +1,4 @@
+"""access to all kinds of files and directories"""
 from pathlib import Path
 import csv
 
@@ -11,6 +12,7 @@ first_gpx:Path = home.joinpath(r"Documents\gps\20220905.gpx")
 second_gpx:Path = home.joinpath(r"Documents\gps\20220907.gpx")
 
 osm_dimension:Path = home.joinpath(r"Documents\gps\osm_dimension.txt")
+tiles_folder:Path = home.joinpath(r"Documents\gps\tiles")
 map_png:Path = home.joinpath(r"Documents\gps\auto_map.png")
 map_osm:Path = home.joinpath(r"Documents\gps\map.osm")
 map_hand:Path = home.joinpath(r"Documents\gps\hand_map.png")
@@ -36,7 +38,7 @@ with open(osm_dimension, 'r', newline='') as csvfile:
     del(csvfile)
     del(row)
 
-POINT = (TOP, LEFT, BOTTOM, RIGHT)
+POINT = (BOTTOM, LEFT, TOP, RIGHT)
 
 if __name__ == "__main__":
     for entry in list(locals().values())[-15:]:
