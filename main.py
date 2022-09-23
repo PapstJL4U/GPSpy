@@ -108,7 +108,7 @@ if __name__ == "__main__":
     only_location = tuple(zip(df['lat'],df['lon']))
     unique_tiles = detailed_tiles(only_location, zoom=15)
     #download all tiles if not yet downloaded
-    #load_all_tiles(unique_tiles, zoom=15)
+    load_all_tiles(unique_tiles, zoom=15)
     
     #plot a path within a single tile
     #plot_my_path(only_location, df)
