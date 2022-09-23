@@ -104,7 +104,7 @@ class TileGraph():
         
         return average_lat, average_lon
     
-    def set_coordinates(self, origin:string=None, myself:string=None)->None:
+    def set_coordinates(self, origin:str=None, myself:str=None)->None:
         """find the coordinates based on the origin"""
 
         #Stop loops by not repeating oneself
@@ -151,7 +151,7 @@ class TileGraph():
             tile["X"] += set_x
             tile["Y"] += set_y
 
-    def drawing(self, name:string=None)->Path:
+    def drawing(self, name:str=None)->Path:
         """draw an image with all tiles"""
         #draw a base image with the dimensions: number of tiles * tile size
         target_img = pimage.new('RGBA', (self.tile_dim*self.mlo, self.tile_dim*self.mla), (192,192,192,0))
