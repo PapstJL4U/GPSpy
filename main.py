@@ -2,9 +2,9 @@
 import pandas as pd
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
-import my_data as md
+import build.my_data as md
 import smopy as sm
-import mapbuilder as mp
+import build.mapbuilder as mp
 
 def detailed_tiles(locations:tuple = None, zoom=15)->set:
     """find the unique list of tiles for all locations"""
