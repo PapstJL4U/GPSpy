@@ -1,7 +1,7 @@
-import logging
 from bottle import static_file, run, template, request, Bottle
 import os
-from pathlib import Path
+import server_main as main
+import pandas as pd
 
 app = Bottle()
 home = os.getcwd()
@@ -25,7 +25,7 @@ def get_a_map():
 
 @app.route('/gps/<filename:path>')
 def send_static(filename):
-    return static_file(filename, root='/path/to/static/files')
+    return static_file(filename, root= os.path.join(safe_location, filename))
 
 
 @app.route('/gps/simple', method='POST')
@@ -37,8 +37,22 @@ def do_upload():
     #save_path = safe_location.joinpath(name).resolve().stem
     save_path = os.path.join(safe_location,name+'.csv')
     upload.save(save_path) # appends upload.filename automatically
-    print(save_path)
+    process_gps_simple(save_path)
+
     return "OK"
+
+def process_gps_simple(path_to_gps_file:str="/")->None:
+    
+    df = pd.read_csv(path_to_gps_file, sep=',')
+    only_location = tuple(zip(df['lat'],df['lon']))
+    unique_tiles = main.detailed_tiles(only_location, zoom=15)
+    #download all tiles if not yet downloaded
+    main.load_all_tiles(unique_tiles, zoom=15)
+    
+    #plot a path within a single tile
+    #remove suffix to alter name later
+    file = path_to_gps_file.removesuffix(".png")
+    main.plot_my_path(file,only_location, df)
 
 
 run(app, host='localhost', port=21812)
