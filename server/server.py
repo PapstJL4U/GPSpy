@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 
 app = Bottle()
-home:Path = Path.home()
-safe_location = home.joinpath("server", "temp_data")
+home = os.getcwd()
+safe_location = os.path.join("server", "temp_data")
 
 @app.route('/')
 @app.route('/hello')
@@ -34,9 +34,11 @@ def do_upload():
     name, ext = os.path.splitext(upload.filename)
     if ext != '.csv':
         return 'File extension not allowed.'
-    save_path = safe_location.joinpath(name).resolve().as_uri
+    #save_path = safe_location.joinpath(name).resolve().stem
+    save_path = os.path.join(safe_location,name+'.csv')
     upload.save(save_path) # appends upload.filename automatically
-    test = safe_location.resolve().as_uri
+    print(save_path)
     return "OK"
+
 
 run(app, host='localhost', port=21812)
