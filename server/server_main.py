@@ -2,8 +2,8 @@
 import pandas as pd
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
-from build import my_data as md
-from build import mapbuilder as mp
+import build.my_data as md
+import build.mapbuilder as mp
 import smopy as sm
 
 def detailed_tiles(locations:tuple = None, zoom=15)->set:

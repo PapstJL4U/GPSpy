@@ -1,10 +1,10 @@
 """Visualize my way to *******"""
 import pandas as pd
+import smopy as sm
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
-import build.my_data as md
-import smopy as sm
-import build.mapbuilder as mp
+from  build import my_data as md
+from build import mapbuilder as mp
 
 def detailed_tiles(locations:tuple = None, zoom=15)->set:
     """find the unique list of tiles for all locations"""
