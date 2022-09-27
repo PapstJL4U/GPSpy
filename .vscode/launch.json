@@ -8,7 +8,7 @@
             "name": "main.py",
             "type": "python",
             "request": "launch",
-            "program": "main.py",
+            "program": "plotter/main.py",
             "console": "integratedTerminal",
             "justMyCode": false
         },
@@ -17,7 +17,7 @@
             "name": "mapbuilder.py",
             "type": "python",
             "request": "launch",
-            "program": "mapbuilder.py",
+            "program": "plotter/mapbuild/mapbuilder.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },

@@ -1,8 +1,8 @@
 """Visualize my way to *******"""
 import pandas as pd
 import smopy as sm
-from plotter.mapbuild import my_data as md
-import plotter.mapbuild.mapbuilder as mp
+import data.my_data as md
+import mapbuild.mapbuilder as mp
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
 
@@ -73,7 +73,7 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
     #point = sm.POINT if you want to define the boundaries yourself.
 
     #generate the graph from the tiles_folder
-    TG = mp.TileGraph()
+    TG = mp.TileGraph(md.tiles_folder)
     #The graph is relative and needs Grid-like coordinates
     TG.set_coordinates(None, '0')
     #Coordinates can be positive and negative, make them all start postive

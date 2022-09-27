@@ -1,19 +1,22 @@
 """Loads the tiles, builds a graph and generates and image with the tiles"""
+import networkx as nx
+import os, sys
 from PIL import Image as pimage
 from matplotlib import pyplot as plt
-import my_data as md
+if __name__ == '__main__':
+    import so_networkx as so
+else:
+    import mapbuild.so_networkx as so
 from smopy import deg2num
-import networkx as nx
-import os
-import so_networkx as so
 from pathlib import Path
 
 class TileGraph():
     """The instance of the a graph-. Contains the graph itself, a dictionary of Tiles used in the graph,
         zoom level, boundaries, and options to draw an image"""
     
-    def __init__(self):
+    def __init__(self, path_to_tiles:Path):
         """Creating an TileGraph instance generates most of it based on a dictionary of Tiles"""
+        self.tiles_folder = path_to_tiles
         self.tile_dic = self.load_all_tiles()       
         self.Graph = self.build_tile_graph(self.tile_dic)
         self.max_lat, self.max_lon, self.min_lat, self.min_lon = self.map_boundaries(self.tile_dic)
@@ -31,7 +34,7 @@ class TileGraph():
         """Build a dictionary of tiles with relevant data"""
         local_tile_dic = {}
         print('Using the following files:')
-        for file in os.listdir(md.tiles_folder):
+        for file in os.listdir(self.tiles_folder):
             if file.lower().endswith('.png'):
                 _, tile_id, zoom, north, west, south, east = file.removesuffix(".png").split('_')
                 local_tile_dic.update({tile_id : {"zoom":int(zoom), "north":float(north), "west":float(west),\
@@ -159,7 +162,7 @@ class TileGraph():
         
         #draw every single tile
         for _, tile in self.tile_dic.items():
-            image = pimage.open(md.tiles_folder.joinpath(tile["name"]), 'r')
+            image = pimage.open(self.tiles_folder.joinpath(tile["name"]), 'r')
             X = tile["X"]
             Y = tile["Y"]
             target_img.paste(image, (X*self.tile_dim, Y*self.tile_dim))
@@ -167,7 +170,7 @@ class TileGraph():
         z = str(self.tile_dic["0"]["zoom"])
         if name is None:
             name = "Combined_Tiles_Zoom_"
-        pathy:Path = md.tiles_folder.joinpath("result", name+z+".png")
+        pathy:Path = self.tiles_folder.joinpath("result", name+z+".png")
         target_img.save(pathy)
         
         return pathy
@@ -185,7 +188,7 @@ class TileGraph():
 
 
 if __name__ == "__main__":
-    TG  = TileGraph()   
+    TG  = TileGraph(Path.home().joinpath(r"Documents\gps\tiles"))   
     TG.set_coordinates(None, '0')
     TG.set_positive_coordinates()
     TG.drawing()
