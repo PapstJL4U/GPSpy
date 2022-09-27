@@ -1,10 +1,10 @@
 """Visualize my way to *******"""
 import pandas as pd
-import smopy as sm
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
-from mapbuild import my_data as md
-from mapbuild import mapbuilder as mp
+import mapbuild.my_data as md
+import mapbuild.mapbuilder as mp
+import smopy as sm
 
 def detailed_tiles(locations:tuple = None, zoom=15)->set:
     """find the unique list of tiles for all locations"""
@@ -32,7 +32,7 @@ def load_all_tiles(tile_list:list[tuple], zoom:int=15)->None:
         #save the tile with the boudaries and zoom
         mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
 
-def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
+def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataFrame = None)->None:
     """do all the loading, plotting and saving files"""
 
     #find the latitude and longitude boundaries of the gps trail
@@ -43,7 +43,7 @@ def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
 
     #load current map from openstreetmaps
     my_map = sm.Map(point, z=15, margin=0.00)
-    my_map.save_png(md.folder.joinpath("auto_map.png"))
+    my_map.save_png(file_path+".png")
     #convert real gps data to pixels on the map
     location_on_image = list(map(my_map.to_pixels, only_location))
     
@@ -60,8 +60,7 @@ def plot_my_path(only_location:tuple = None, df:pd.DataFrame = None)->None:
     plt.plot(x,y,color="blue", linewidth=1)
     plt.axis('off')
     plt.imshow(data)
-    plt.savefig(md.folder.joinpath("auto_result.png"), dpi=600)
-    plt.show()
+    plt.savefig(file_path+"_final.png", dpi=600)
 
 def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None:
     """do all the loading, plotting and saving files"""
@@ -100,18 +99,3 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
     plt.imshow(data)
     plt.savefig(md.folder.joinpath("mapbuilder_result.png"), dpi=600)
     plt.show()
-
-if __name__ == "__main__":
-    #read gps data from file and
-    # filter to only get latitude and longitude
-    df = pd.read_csv(md.work_csv, sep=',')
-    only_location = tuple(zip(df['lat'],df['lon']))
-    unique_tiles = detailed_tiles(only_location, zoom=15)
-    #download all tiles if not yet downloaded
-    load_all_tiles(unique_tiles, zoom=15)
-    
-    #plot a path within a single tile
-    #plot_my_path(only_location, df)
-
-    #plot a path within multiple tiles (by zoom)
-    plot_my_mapbuilder(only_location, df)

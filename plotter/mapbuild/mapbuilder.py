@@ -5,7 +5,7 @@ import my_data as md
 from smopy import deg2num
 import networkx as nx
 import os
-import build.so_networkx as so
+import so_networkx as so
 from pathlib import Path
 
 class TileGraph():
