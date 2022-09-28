@@ -1,11 +1,15 @@
 from bottle import static_file, run, template, request, Bottle
-import os
-import server_main as main
-import pandas as pd
+import os, logging
+if __name__ == '__main__':
+    import server_logic as sl
+else:
+    import server.server_logic as sl
 
 app = Bottle()
 home = os.getcwd()
 safe_location = os.path.join("server", "temp_data")
+logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.INFO)
+logger = logging.getLogger(name="server")
 
 @app.route('/')
 @app.route('/hello')
@@ -36,6 +40,9 @@ def do_upload():
         return 'File extension not allowed.'
     #save_path = safe_location.joinpath(name).resolve().stem
     save_path = os.path.join(safe_location,name+'.csv')
+    print(os.getcwd(), save_path)
+    logger.info("OS: "+os.getcwd())
+    logger.info("Save path: "+save_path)
     upload.save(save_path) # appends upload.filename automatically
     process_gps_simple(save_path)
 
@@ -43,16 +50,13 @@ def do_upload():
 
 def process_gps_simple(path_to_gps_file:str="/")->None:
     
-    df = pd.read_csv(path_to_gps_file, sep=',')
-    only_location = tuple(zip(df['lat'],df['lon']))
-    unique_tiles = main.detailed_tiles(only_location, zoom=15)
-    #download all tiles if not yet downloaded
-    main.load_all_tiles(unique_tiles, zoom=15)
-    
     #plot a path within a single tile
     #remove suffix to alter name later
     file = path_to_gps_file.removesuffix(".png")
-    main.plot_my_path(file,only_location, df)
+    image = sl.single_tile_gps(file)
 
+def start():
+    run(app, host='localhost', port=21812)
 
-run(app, host='localhost', port=21812)
+if __name__ == '__main__':
+    start()

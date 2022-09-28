@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Tile Server",
+            "type": "python",
+            "request": "launch",
+            "program": "plotter/server_controller.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "main.py",
             "type": "python",
             "request": "launch",
@@ -12,7 +20,6 @@
             "console": "integratedTerminal",
             "justMyCode": false
         },
-
         {
             "name": "mapbuilder.py",
             "type": "python",
@@ -20,15 +27,6 @@
             "program": "plotter/mapbuild/mapbuilder.py",
             "console": "integratedTerminal",
             "justMyCode": true
-        },
-
-        {
-            "name": "Server",
-            "type": "python",
-            "request": "launch",
-            "program": "server/server.py",
-            "console": "integratedTerminal",
-            "justMyCode": false
         }
     ]
 }

@@ -5,5 +5,4 @@ if __name__ == "__main__":
     print("Hello World!")
     print("Starting Server!")
     
-    s = serv.server();
-    s.start();
+    tile_server = serv.start();

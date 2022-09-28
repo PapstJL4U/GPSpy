@@ -2,7 +2,7 @@
 import pandas as pd
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
-import mapbuild.my_data as md
+import data.my_data as md
 import mapbuild.mapbuilder as mp
 import smopy as sm
 
@@ -32,7 +32,7 @@ def load_all_tiles(tile_list:list[tuple], zoom:int=15)->None:
         #save the tile with the boudaries and zoom
         mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
 
-def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataFrame = None)->None:
+def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataFrame = None)->str:
     """do all the loading, plotting and saving files"""
 
     #find the latitude and longitude boundaries of the gps trail
@@ -61,6 +61,8 @@ def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataF
     plt.axis('off')
     plt.imshow(data)
     plt.savefig(file_path+"_final.png", dpi=600)
+
+    return file_path+"_final.png"
 
 def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None:
     """do all the loading, plotting and saving files"""
@@ -98,4 +100,15 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
     plt.axis('off')
     plt.imshow(data)
     plt.savefig(md.folder.joinpath("mapbuilder_result.png"), dpi=600)
-    plt.show()
+
+def single_tile_gps(path_to_gps_file:str="/")->str:
+        #read gps data from file and
+    # filter to only get latitude and longitude
+    df = pd.read_csv(path_to_gps_file, sep=',')
+    only_location = tuple(zip(df['lat'],df['lon']))
+    unique_tiles = detailed_tiles(only_location, zoom=15)
+    #download all tiles if not yet downloaded
+    load_all_tiles(unique_tiles, zoom=15)
+    
+    #plot a path within a single tile
+    return plot_my_path(only_location, df)
