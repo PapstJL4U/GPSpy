@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import data.my_data as md
 import mapbuild.mapbuilder as mp
 import smopy as sm
+import pathlib as Path
 
 def detailed_tiles(locations:tuple = None, zoom=15)->set:
     """find the unique list of tiles for all locations"""
@@ -14,7 +15,7 @@ def detailed_tiles(locations:tuple = None, zoom=15)->set:
     print(set(tile_list), len(set(tile_list)))
     return (set(tile_list))
 
-def load_all_tiles(tile_list:list[tuple], zoom:int=15)->None:
+def load_all_tiles(path_to_gps_file:str, tile_list:list[tuple], zoom:int=15)->None:
     """load all tiles"""
     for i,tile in enumerate(tile_list):
         #find the center of a tile
@@ -30,6 +31,7 @@ def load_all_tiles(tile_list:list[tuple], zoom:int=15)->None:
         #get the single tile based on the center point to allow maximum zoom
         mao = sm.Map(lat, lon, z=zoom)
         #save the tile with the boudaries and zoom
+        #pathy:Path = Path(path_to_gps_file+)
         mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
 
 def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataFrame = None)->str:
@@ -105,7 +107,6 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
 def single_tile_gps(path_to_gps_file:str="/")->str:
         #read gps data from file and
     # filter to only get latitude and longitude
-    print(path_to_gps_file)
     df = pd.read_csv(path_to_gps_file+'.csv', sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
     path_to_image = plot_my_path(path_to_gps_file, only_location, df)
@@ -115,9 +116,13 @@ def single_tile_gps(path_to_gps_file:str="/")->str:
 def multi_tile_gps(path_to_gps_file:str="/")->str:
         #read gps data from file and
     # filter to only get latitude and longitude
-    print(path_to_gps_file)
     df = pd.read_csv(path_to_gps_file+'.csv', sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
-    path_to_image = plot_my_path(path_to_gps_file, only_location, df)
+    
+    unique_tiles = detailed_tiles(only_location, zoom=15)
+    #download all tiles if not yet downloaded
+    load_all_tiles(path_to_gps_file,unique_tiles, zoom=15)
+
+    path_to_image = plot_my_mapbuilder(path_to_gps_file, only_location, df)
     #plot a path within a single tile
     return path_to_image

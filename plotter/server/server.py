@@ -1,5 +1,5 @@
 from bottle import static_file, run, template, request, Bottle
-import os, logging
+import os, shutil, logging
 if __name__ == '__main__':
     import server_logic as sl
 else:
@@ -55,6 +55,7 @@ def do_upload():
     
     file = image.split("/")[-1]
     logger.info("Returned file: "+file)
+    cleanup()
     return send_static(file)
 
 @app.route('/gps/complex', method='POST')
@@ -89,15 +90,24 @@ def process_gps(path_to_gps_file:str="/", simple:bool=True)->str:
 
 def cleanup():
     logger.info("Deleting unneeded files...")
-    for file in os.listdir(safe_location):
-        if file.endswith('.csv'):
-            os.remove(file)
-        if file.endswith('.png') and "final" not in file:
-            os.remove(file)
+
+    with os.scandir(safe_location) as it:
+        for file in it:            
+            if file.name.endswith('.csv'):
+                logger.info("Deleting file: "+file.name)
+                os.remove(file)
+            elif file.name.endswith('.png') and "final" not in file.name:
+                logger.info("Deleting file: "+file.name)
+                os.remove(file)
+            else:
+                if file.is_dir():
+                    logger.info("Deleting folder: "+file.name)
+                    shutil.rmtree(file)
 
 def start():
-    run(app, host='localhost', port=21812)
     logger.info("Current Working Directory: "+os.getcwd())
+    logger.info("Save Location: "+safe_location)
+    run(app, host='localhost', port=21812)
 
 if __name__ == '__main__':
     start()
