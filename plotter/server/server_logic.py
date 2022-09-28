@@ -38,12 +38,13 @@ def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataF
     #find the latitude and longitude boundaries of the gps trail
     left, right= min(df['lon']), max(df['lon'])
     bottom, top = min(df['lat']), max(df['lat'])
-    point = (bottom, left, top, right) 
+    box = (bottom, left, top, right) 
     #point = sm.POINT if you want to define the boundaries yourself.
 
     #load current map from openstreetmaps
-    my_map = sm.Map(point, z=15, margin=0.00)
-    my_map.save_png(file_path+".png")
+    my_map = sm.Map(box, z=15, margin=0.00)
+    image = file_path +".png"
+    my_map.save_png(image)
     #convert real gps data to pixels on the map
     location_on_image = list(map(my_map.to_pixels, only_location))
     
@@ -56,7 +57,7 @@ def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataF
         x[i] =  int(pxl[0])
         y[i] =  int(pxl[1])
 
-    data = mimage.imread(md.map_png)
+    data = mimage.imread(image)
     plt.plot(x,y,color="blue", linewidth=1)
     plt.axis('off')
     plt.imshow(data)
@@ -104,11 +105,19 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
 def single_tile_gps(path_to_gps_file:str="/")->str:
         #read gps data from file and
     # filter to only get latitude and longitude
-    df = pd.read_csv(path_to_gps_file, sep=',')
+    print(path_to_gps_file)
+    df = pd.read_csv(path_to_gps_file+'.csv', sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
-    unique_tiles = detailed_tiles(only_location, zoom=15)
-    #download all tiles if not yet downloaded
-    load_all_tiles(unique_tiles, zoom=15)
-    
+    path_to_image = plot_my_path(path_to_gps_file, only_location, df)
     #plot a path within a single tile
-    return plot_my_path(only_location, df)
+    return path_to_image
+
+def multi_tile_gps(path_to_gps_file:str="/")->str:
+        #read gps data from file and
+    # filter to only get latitude and longitude
+    print(path_to_gps_file)
+    df = pd.read_csv(path_to_gps_file+'.csv', sep=',')
+    only_location = tuple(zip(df['lat'],df['lon']))
+    path_to_image = plot_my_path(path_to_gps_file, only_location, df)
+    #plot a path within a single tile
+    return path_to_image
