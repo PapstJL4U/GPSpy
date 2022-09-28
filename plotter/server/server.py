@@ -76,7 +76,7 @@ def do_upload():
     
     file = image.split("\\")[-2:]
     logger.info("Returned file: "+file[0]+"/"+ file[1])
-    #cleanup()
+    cleanup()
     return send_static(os.path.join(file[0],file[1]))
 
 def process_gps(path_to_gps_file:str="/", simple:bool=True)->str:
