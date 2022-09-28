@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import data.my_data as md
 import mapbuild.mapbuilder as mp
 import smopy as sm
+import os
 import pathlib as Path
 
 def detailed_tiles(locations:tuple = None, zoom=15)->set:
@@ -31,8 +32,8 @@ def load_all_tiles(path_to_gps_file:str, tile_list:list[tuple], zoom:int=15)->No
         #get the single tile based on the center point to allow maximum zoom
         mao = sm.Map(lat, lon, z=zoom)
         #save the tile with the boudaries and zoom
-        #pathy:Path = Path(path_to_gps_file+)
-        mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
+        pathy:Path = Path.Path(path_to_gps_file)
+        mao.save_png(pathy.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
 
 def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataFrame = None)->str:
     """do all the loading, plotting and saving files"""
@@ -67,17 +68,16 @@ def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataF
 
     return file_path+"_final.png"
 
-def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None:
+def plot_my_mapbuilder(path_to_tiles_folder:str,only_location:tuple = None, df:pd.DataFrame = None)->str:
     """do all the loading, plotting and saving files"""
 
     #find the latitude and longitude boundaries of the gps trail
     left, right= min(df['lon']), max(df['lon'])
     bottom, top = min(df['lat']), max(df['lat'])
     point = (bottom, left, top, right) 
-    #point = sm.POINT if you want to define the boundaries yourself.
 
     #generate the graph from the tiles_folder
-    TG = mp.TileGraph()
+    TG = mp.TileGraph(Path.Path(path_to_tiles_folder))
     #The graph is relative and needs Grid-like coordinates
     TG.set_coordinates(None, '0')
     #Coordinates can be positive and negative, make them all start postive
@@ -102,7 +102,8 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
     plt.plot(x,y,color="red", linewidth=0.5)
     plt.axis('off')
     plt.imshow(data)
-    plt.savefig(md.folder.joinpath("mapbuilder_result.png"), dpi=600)
+    plt.savefig(os.path.join(path_to_tiles_folder,"mapbuilder_final.png"), dpi=600)
+    return 
 
 def single_tile_gps(path_to_gps_file:str="/")->str:
         #read gps data from file and

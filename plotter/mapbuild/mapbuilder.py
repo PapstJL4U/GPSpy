@@ -14,7 +14,7 @@ class TileGraph():
     """The instance of the a graph-. Contains the graph itself, a dictionary of Tiles used in the graph,
         zoom level, boundaries, and options to draw an image"""
     
-    def __init__(self, path_to_tiles:Path):
+    def __init__(self, path_to_tiles:Path=None):
         """Creating an TileGraph instance generates most of it based on a dictionary of Tiles"""
         self.tiles_folder = path_to_tiles
         self.tile_dic = self.load_all_tiles()       
