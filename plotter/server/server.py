@@ -6,8 +6,8 @@ else:
     import server.server_logic as sl
 
 app = Bottle()
-home = os.getcwd()
-safe_location = os.path.join("server", "temp_data")
+home:str = os.getcwd()
+safe_location:str = os.path.join(home,"plotter", "server", "temp_data")
 logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.INFO)
 logger = logging.getLogger(name="server")
 
@@ -53,7 +53,7 @@ def process_gps_simple(path_to_gps_file:str="/")->None:
     #plot a path within a single tile
     #remove suffix to alter name later
     file = path_to_gps_file.removesuffix(".png")
-    image = sl.single_tile_gps(file)
+    image = sl.single_tile_gps(path_to_gps_file)
 
 def start():
     run(app, host='localhost', port=21812)
