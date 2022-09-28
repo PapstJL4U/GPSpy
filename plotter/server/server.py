@@ -67,17 +67,17 @@ def do_upload():
         return 'File extension not allowed.'
 
     save_path = os.path.join(safe_location,name+'.csv')
-    os.makedirs(os.path.join(safe_location,name))
+    os.makedirs(os.path.join(safe_location,name), exist_ok=True)
     logger.info("File uploaded: "+save_path)
     logger.info("Directoy created: "+os.path.join(safe_location,name))
 
     upload.save(save_path, overwrite=True) # appends upload.filename automatically
     image:str = process_gps(save_path, simple=False)
     
-    file = image.split("\\")[-1]
-    logger.info("Returned file: "+file)
-    #cleanup()
-    return send_static(file)
+    file = image.split("\\")[-2:]
+    logger.info("Returned file: "+file[0]+"/"+ file[1])
+    cleanup()
+    return send_static(os.path.join(file[0],file[1]))
 
 def process_gps(path_to_gps_file:str="/", simple:bool=True)->str:
     #remove suffix to alter name later
@@ -86,7 +86,7 @@ def process_gps(path_to_gps_file:str="/", simple:bool=True)->str:
     if simple:
         image:str = sl.single_tile_gps(file)
     else:
-        image.str = sl.multi_tile_gps(file)
+        image:str = sl.multi_tile_gps(file)
     
     return image
 

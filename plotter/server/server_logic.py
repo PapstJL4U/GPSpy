@@ -2,11 +2,12 @@
 import pandas as pd
 from matplotlib import image as mimage
 from matplotlib import pyplot as plt
-import data.my_data as md
 import mapbuild.mapbuilder as mp
 import smopy as sm
 import os
 import pathlib as Path
+
+plt.ioff()
 
 def detailed_tiles(locations:tuple = None, zoom=15)->set:
     """find the unique list of tiles for all locations"""
@@ -65,6 +66,7 @@ def plot_my_path(file_path:str = "None", only_location:tuple = None, df:pd.DataF
     plt.axis('off')
     plt.imshow(data)
     plt.savefig(file_path+"_final.png", dpi=600)
+    plt.clf()
 
     return file_path+"_final.png"
 
@@ -102,8 +104,10 @@ def plot_my_mapbuilder(path_to_tiles_folder:str,only_location:tuple = None, df:p
     plt.plot(x,y,color="red", linewidth=0.5)
     plt.axis('off')
     plt.imshow(data)
-    plt.savefig(os.path.join(path_to_tiles_folder,"mapbuilder_final.png"), dpi=600)
-    return 
+    final_image = os.path.join(path_to_tiles_folder,"mapbuilder_final.png")
+    plt.savefig(final_image, dpi=600)
+    plt.clf()
+    return final_image
 
 def single_tile_gps(path_to_gps_file:str="/")->str:
         #read gps data from file and
@@ -123,7 +127,6 @@ def multi_tile_gps(path_to_gps_file:str="/")->str:
     unique_tiles = detailed_tiles(only_location, zoom=15)
     #download all tiles if not yet downloaded
     load_all_tiles(path_to_gps_file,unique_tiles, zoom=15)
-
     path_to_image = plot_my_mapbuilder(path_to_gps_file, only_location, df)
-    #plot a path within a single tile
+
     return path_to_image

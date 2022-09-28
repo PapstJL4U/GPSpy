@@ -35,7 +35,7 @@ class TileGraph():
         local_tile_dic = {}
         print('Using the following files:')
         for file in os.listdir(self.tiles_folder):
-            if file.lower().endswith('.png'):
+            if file.lower().endswith('.png') and file.lower().startswith('tile'):
                 _, tile_id, zoom, north, west, south, east = file.removesuffix(".png").split('_')
                 local_tile_dic.update({tile_id : {"zoom":int(zoom), "north":float(north), "west":float(west),\
                     "south":float(south), "east":float(east), "name":file}})
@@ -170,7 +170,7 @@ class TileGraph():
         z = str(self.tile_dic["0"]["zoom"])
         if name is None:
             name = "Combined_Tiles_Zoom_"
-        pathy:Path = self.tiles_folder.joinpath("result", name+z+".png")
+        pathy:Path = self.tiles_folder.joinpath(name+z+"_final.png")
         target_img.save(pathy)
         
         return pathy
