@@ -84,7 +84,7 @@ class TileGraph():
         #create dummy tiles for tiles that have no orthoginal neigbours, but hopefully diagonal neigbours
         for node in Graph.nodes.items():
             if Graph.degree[node[0]]==0:
-                self.set_dummies(node)
+                self.set_dummies(node, Graph)
         # The module can be used alone
         # This part is mainly for debugging
         if __name__ == "__main__":
@@ -211,7 +211,7 @@ class TileGraph():
         
         return px,py
 
-    def set_dummies(self, node):
+    def set_dummies(self, node, Graph):
 
         _ele = len(self.tile_dic)
         _s = node[1]["south"]
@@ -221,12 +221,26 @@ class TileGraph():
         _z = node[1]["zoom"]
         north_dummy = {_ele+1 : {"south": _n, "north": _n, "west": _w, "east": _e, "zoom": _z}}
         south_dummy = {_ele+2 : {"north": _s, "south": _s, "west": _w, "east": _e, "zoom": _z}}
-        east_dummy = {_ele+1 : {"south": _s, "north": _n, "west": _e, "east": _e, "zoom": _z}}
-        west_dummy = {_ele+1 : {"south": _s, "north": _n, "west": _w, "east": _w, "zoom": _z}}
+        east_dummy = {_ele+3 : {"south": _s, "north": _n, "west": _e, "east": _e, "zoom": _z}}
+        west_dummy = {_ele+4 : {"south": _s, "north": _n, "west": _w, "east": _w, "zoom": _z}}
         self.tile_dic.update(north_dummy)
         self.tile_dic.update(south_dummy)
         self.tile_dic.update(east_dummy)
         self.tile_dic.update(west_dummy)
+        Graph.add_nodes_from([_ele+1, _ele+2, _ele+3, _ele+4])
+        nx.set_node_attributes(Graph, self.tile_dic)
+
+        Graph.add_edge(_ele+1, node[0], orientation="South")
+        Graph.add_edge(node[0], _ele+1, orientation="North")
+
+        Graph.add_edge(_ele+2, node[0], orientation="North")
+        Graph.add_edge(node[0], _ele+2, orientation="South")
+
+        Graph.add_edge(_ele+3, node[0], orientation="West")
+        Graph.add_edge(node[0], _ele+3, orientation="East")
+
+        Graph.add_edge(_ele+4, node[0], orientation="East")
+        Graph.add_edge(node[0], _ele+4, orientation="West")
 
 
 if __name__ == "__main__":
