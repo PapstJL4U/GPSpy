@@ -110,7 +110,8 @@ def plot_my_mapbuilder(path_to_tiles_folder:str,only_location:tuple = None, df:p
     return final_image
 
 def single_tile_gps(path_to_gps_file:str="/")->str:
-        #read gps data from file and
+    
+    #read gps data from file and
     # filter to only get latitude and longitude
     df = pd.read_csv(path_to_gps_file+'.csv', sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
@@ -119,13 +120,15 @@ def single_tile_gps(path_to_gps_file:str="/")->str:
     return path_to_image
 
 def multi_tile_gps(path_to_gps_file:str="/")->str:
-        #read gps data from file and
+    
+    #read gps data from file and
     # filter to only get latitude and longitude
     df = pd.read_csv(path_to_gps_file+'.csv', sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
     
+    #find all need tiles, no multiples of the same tile
     unique_tiles = detailed_tiles(only_location, zoom=15)
-    #download all tiles if not yet downloaded
+    #download all tiles 
     load_all_tiles(path_to_gps_file,unique_tiles, zoom=15)
     path_to_image = plot_my_mapbuilder(path_to_gps_file, only_location, df)
 

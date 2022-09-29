@@ -22,6 +22,7 @@ def index(name):
     
 @app.route('/gps/simple', method='GET')
 def get_a_map():
+    cleanup()
     return """<form action="/gps/simple" method="post" enctype="multipart/form-data">
                 Select a file: <input type="file" name="upload" />
                 <input type="submit" value="Start upload" />
@@ -29,6 +30,7 @@ def get_a_map():
 
 @app.route('/gps/complex', method='GET')
 def get_a_map():
+    cleanup()
     return """<form action="/gps/complex" method="post" enctype="multipart/form-data">
                 Select a file: <input type="file" name="upload" />
                 <input type="submit" value="Start upload" />
@@ -74,10 +76,11 @@ def do_upload():
     upload.save(save_path, overwrite=True) # appends upload.filename automatically
     image:str = process_gps(save_path, simple=False)
     
-    file = image.split("\\")[-2:]
-    logger.info("Returned file: "+file[0]+"/"+ file[1])
+    file = shutil.move(image, safe_location)
+    logger.info("Returned file: "+file)
     cleanup()
-    return send_static(os.path.join(file[0],file[1]))
+    return send_static(file)
+
 
 def process_gps(path_to_gps_file:str="/", simple:bool=True)->str:
     #remove suffix to alter name later
