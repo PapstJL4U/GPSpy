@@ -1,6 +1,6 @@
 """Loads the tiles, builds a graph and generates and image with the tiles"""
 import networkx as nx
-import os, sys
+import os
 from PIL import Image as pimage
 from matplotlib import pyplot as plt
 if __name__ == '__main__':
