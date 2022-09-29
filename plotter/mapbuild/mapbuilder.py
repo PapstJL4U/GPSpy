@@ -16,22 +16,38 @@ class TileGraph():
     
     def __init__(self, path_to_tiles:Path=None):
         """Creating an TileGraph instance generates most of it based on a dictionary of Tiles"""
+        #path to find the images of the tiles
         self.tiles_folder = path_to_tiles
-        self.tile_dic = self.load_all_tiles()       
+        #this dictionary represents all the tiles images as easily accessable entries
+        self.tile_dic = self.load_all_tiles()
+        #The networkx Graph representation of the tiles
         self.Graph = self.build_tile_graph(self.tile_dic)
+        #Max values of the edges from al tiles. All tiles can be placed within theses boundaries
         self.max_lat, self.max_lon, self.min_lat, self.min_lon = self.map_boundaries(self.tile_dic)
+        #Zoom factor of this map
         self.zoom = self.tile_dic["0"]["zoom"]
+        
+        #Pixel version of the above gps coordinates to draw them within the correct boundaries
         self.min_x, self.min_y  = deg2num(self.min_lat, self.min_lon, self.zoom, do_round=False) 
         self.max_x, self.max_y = deg2num(self.max_lat, self.max_lon, self.zoom, do_round=False)
 
+        #get the average height and width of a tile in lat/lat
         self.average_lat, self.average_lon = self.avg_tile_size_degree(self.tile_dic)
+        #to stop endless loops when building the graph we remember where we were
+        #initialize for nothing
         self.visited = []
+
+        #tile size in pixel, tiles are quadratic
         self.tile_dim = 256
+        #size of the map in tiles
+        #i.e a map of 3 horizonatal tiles and 5 vertical tiles 
+        #has a size of mla=5, mlo=3, 3 by 5 tiles
         self.mla = int(round((self.max_lat-self.min_lat) / self.average_lat,0))
         self.mlo = int(round((self.max_lon-self.min_lon) / self.average_lon,0))
         
     def load_all_tiles(self)->dict:
-        """Build a dictionary of tiles with relevant data"""
+        """Build a dictionary of tiles with relevant data
+        return: dictionary"""
         local_tile_dic = {}
         print('Using the following files:')
         for file in os.listdir(self.tiles_folder):
@@ -42,7 +58,8 @@ class TileGraph():
         return local_tile_dic
 
     def build_tile_graph(self, tile_dic:dict)->nx.Graph:
-        """build a full sized image from thiles"""
+        """build a full sized image from thiles
+        return: nx.DiGraph"""
         Graph = nx.DiGraph()
         Graph.add_nodes_from(tile_dic)
         nx.set_node_attributes(Graph, tile_dic)
@@ -76,7 +93,7 @@ class TileGraph():
 
     def map_boundaries(self, tile_dic:dict)->tuple:
         """return the boundaries of the map based on the used tiles
-        returns (max_lat, max_lon, min_lat, min_lon)"""
+        return: (max_lat, max_lon, min_lat, min_lon)"""
         max_lat, max_lon, min_lat, min_lon = -100.0, -200.0, 100.0, 200.0
 
         for item in tile_dic.items():
@@ -92,7 +109,8 @@ class TileGraph():
 
     def avg_tile_size_degree(self, tile_dict:dict)->int:
         """returns the average tile size of all tiles in the dictionary
-        in degrees. Returns average_lat, average_lon"""
+        in degrees. 
+        Return: average_lat, average_lon"""
         list_lat, list_lon = [], []
 
         for item in tile_dict.items():
@@ -155,8 +173,9 @@ class TileGraph():
             tile["X"] += set_x
             tile["Y"] += set_y
 
-    def drawing(self, name:str=None)->Path:
-        """draw an image with all tiles"""
+    def drawing(self, name:str=None)->Path.Path:
+        """draw an image with all tiles
+        Return: Path.Path"""
         #draw a base image with the dimensions: number of tiles * tile size
         target_img = pimage.new('RGBA', (self.tile_dim*self.mlo, self.tile_dim*self.mla), (192,192,192,0))
         
@@ -176,7 +195,8 @@ class TileGraph():
         return pathy
 
     def to_pixels(self, lat_lon:tuple)->float:
-        """Convert lat and lon coordinates to pixels based on the image"""
+        """Convert lat and lon coordinates to pixels based on the image
+        Return: px,py"""
         lat, lon = lat_lon
         zoom = self.zoom
         x,y = deg2num(lat, lon, zoom=zoom, do_round=False)
