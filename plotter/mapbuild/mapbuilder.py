@@ -80,6 +80,10 @@ class TileGraph():
                     if (home[1]["east"] == neighbor[1]["west"])\
                         and (home[1]["north"] == neighbor[1]["north"]):
                             Graph.add_edge(neighbor[0], home[0], orientation="West")
+        #create dummy tiles for tiles that have no ordinal neigbours, but hopefully diagonal neigbours
+        for node in Graph.nodes.items():
+            if Graph.degree[node]==0:
+                self.set_dummies(node)
         # The module can be used alone
         # This part is mainly for debugging
         if __name__ == "__main__":
@@ -206,6 +210,11 @@ class TileGraph():
         
         return px,py
 
+    def set_dummies(self, node):
+        north_dummy = None
+        south_dummy = None
+        east_dummy = None
+        west_dummy = None
 
 if __name__ == "__main__":
     TG  = TileGraph(Path.home().joinpath(r"Documents\gps\tiles"))   
