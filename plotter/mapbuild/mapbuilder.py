@@ -80,10 +80,10 @@ class TileGraph():
                     if (home[1]["east"] == neighbor[1]["west"])\
                         and (home[1]["north"] == neighbor[1]["north"]):
                             Graph.add_edge(neighbor[0], home[0], orientation="West")
-                            
+
         #create dummy tiles for tiles that have no orthoginal neigbours, but hopefully diagonal neigbours
         for node in Graph.nodes.items():
-            if Graph.degree[node]==0:
+            if Graph.degree[node[0]]==0:
                 self.set_dummies(node)
         # The module can be used alone
         # This part is mainly for debugging
@@ -178,7 +178,7 @@ class TileGraph():
             tile["X"] += set_x
             tile["Y"] += set_y
 
-    def drawing(self, name:str=None)->Path.Path:
+    def drawing(self, name:str=None)->Path:
         """draw an image with all tiles
         Return: Path.Path"""
         #draw a base image with the dimensions: number of tiles * tile size
@@ -212,10 +212,22 @@ class TileGraph():
         return px,py
 
     def set_dummies(self, node):
-        north_dummy = None
-        south_dummy = None
-        east_dummy = None
-        west_dummy = None
+
+        _ele = len(self.tile_dic)
+        _s = node[1]["south"]
+        _n = node[1]["north"]
+        _w = node[1]["west"]
+        _e = node[1]["east"]
+        _z = node[1]["zoom"]
+        north_dummy = {_ele+1 : {"south": _n, "north": _n, "west": _w, "east": _e, "zoom": _z}}
+        south_dummy = {_ele+2 : {"north": _s, "south": _s, "west": _w, "east": _e, "zoom": _z}}
+        east_dummy = {_ele+1 : {"south": _s, "north": _n, "west": _e, "east": _e, "zoom": _z}}
+        west_dummy = {_ele+1 : {"south": _s, "north": _n, "west": _w, "east": _w, "zoom": _z}}
+        self.tile_dic.update(north_dummy)
+        self.tile_dic.update(south_dummy)
+        self.tile_dic.update(east_dummy)
+        self.tile_dic.update(west_dummy)
+
 
 if __name__ == "__main__":
     TG  = TileGraph(Path.home().joinpath(r"Documents\gps\tiles"))   

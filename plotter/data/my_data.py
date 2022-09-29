@@ -7,6 +7,7 @@ folder:Path = home.joinpath(r"Documents\gps")
 first_csv:Path = home.joinpath(r"Documents\gps\20220905.csv")
 second_csv:Path = home.joinpath(r"Documents\gps\20220907.csv")
 work_csv:Path = home.joinpath(r"Documents\gps\20220912.csv")
+last_will:Path = home.joinpath(r"Documents\gps\lastwill.csv")
 
 first_gpx:Path = home.joinpath(r"Documents\gps\20220905.gpx")
 second_gpx:Path = home.joinpath(r"Documents\gps\20220907.gpx")

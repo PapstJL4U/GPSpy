@@ -104,7 +104,7 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
 if __name__ == "__main__":
     #read gps data from file and
     # filter to only get latitude and longitude
-    df = pd.read_csv(md.work_csv, sep=',')
+    df = pd.read_csv(md.last_will, sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
     unique_tiles = detailed_tiles(only_location, zoom=15)
     #download all tiles if not yet downloaded
