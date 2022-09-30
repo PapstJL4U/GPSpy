@@ -18,11 +18,14 @@ class TileGraph():
         """Creating an TileGraph instance generates most of it based on a dictionary of Tiles"""
         #path to find the images of the tiles
         self.tiles_folder = path_to_tiles
+        #to stop endless loops when building the graph we remember where we were
+        #initialize for nothing
+        self.visited = []
         #this dictionary represents all the tiles images as easily accessable entries
         self.tile_dic = self.load_all_tiles()
         #The networkx Graph representation of the tiles
         self.Graph = self.build_tile_graph(self.tile_dic)
-        #Max values of the edges from al tiles. All tiles can be placed within theses boundaries
+        #Max values of the edges from all tiles. All tiles can be placed within theses boundaries
         self.max_lat, self.max_lon, self.min_lat, self.min_lon = self.map_boundaries(self.tile_dic)
         #Zoom factor of this map
         self.zoom = self.tile_dic["0"]["zoom"]
@@ -32,10 +35,7 @@ class TileGraph():
         self.max_x, self.max_y = deg2num(self.max_lat, self.max_lon, self.zoom, do_round=False)
 
         #get the average height and width of a tile in lat/lat
-        self.average_lat, self.average_lon = self.avg_tile_size_degree(self.tile_dic)
-        #to stop endless loops when building the graph we remember where we were
-        #initialize for nothing
-        self.visited = []
+        self.average_lat, self.average_lon = self.avg_tile_size_degree()
 
         #tile size in pixel, tiles are quadratic
         self.tile_dim = 256
@@ -63,30 +63,24 @@ class TileGraph():
         Graph = nx.DiGraph()
         Graph.add_nodes_from(tile_dic)
         nx.set_node_attributes(Graph, tile_dic)
-        #Go through each tile and find edges to every other tile
-        for home in Graph.nodes.items():
-            for neighbor in Graph.nodes.items():
-                if home != neighbor:
-                    if (home[1]["north"] == neighbor[1]["south"])\
-                        and (home[1]["east"] == neighbor[1]["east"]):
-                            Graph.add_edge(neighbor[0], home[0], orientation="South")
-                    if (home[1]["south"] == neighbor[1]["north"])\
-                        and (home[1]["east"] == neighbor[1]["east"]):
-                            Graph.add_edge(neighbor[0], home[0], orientation="North")
-                    
-                    if (home[1]["west"] == neighbor[1]["east"])\
-                        and (home[1]["north"] == neighbor[1]["north"]):
-                            Graph.add_edge(neighbor[0], home[0], orientation="East")
-                    if (home[1]["east"] == neighbor[1]["west"])\
-                        and (home[1]["north"] == neighbor[1]["north"]):
-                            Graph.add_edge(neighbor[0], home[0], orientation="West")
+        #Go through each tile and find initial edges to every other tile
+        self.find_edges(Graph)
 
         #create dummy tiles for tiles that have no orthoginal neigbours, but hopefully diagonal neigbours
+        #At this point diagonal neigbours without orthognal itermediate neigbours are not connected
+
+        #create copy of the original to iterate over, so we can add dummy tiles to the original
         gni = copy.deepcopy(Graph.nodes.items())
         for node in gni:
+            #tiles with edges need dummy neighbours to be connected to the graph
             if Graph.degree[node[0]]==0:
                 self.set_dummies(node, Graph)
-        self.find_edges_to_dummies(Graph)
+        #find new edges from true tiles to dummy files.
+        self.find_edges(Graph)
+
+        #delete all dummies, that don't connect to true tiles
+        self.delete_one_way_dummies(Graph)
+
         # The module can be used alone
         # This part is mainly for debugging
         if __name__ == "__main__":
@@ -114,19 +108,20 @@ class TileGraph():
                 min_lon = item[1]["west"]
         return (max_lat, max_lon, min_lat, min_lon)
 
-    def avg_tile_size_degree(self, tile_dict:dict)->int:
+    def avg_tile_size_degree(self)->int:
         """returns the average tile size of all tiles in the dictionary
         in degrees. 
         Return: average_lat, average_lon"""
         list_lat, list_lon = [], []
 
-        for item in tile_dict.items():
-            west, east = item[1]["west"], item[1]["east"]
-            north, south = item[1]["north"], item[1]["south"]
-            distance_lat = abs(north - south)
-            distance_lon = abs(east - west)
-            list_lat.append(distance_lat)
-            list_lon.append(distance_lon)
+        for item in self.tile_dic.items():
+            if "dummy" not in item[1]["name"]:
+                west, east = item[1]["west"], item[1]["east"]
+                north, south = item[1]["north"], item[1]["south"]
+                distance_lat = abs(north - south)
+                distance_lon = abs(east - west)
+                list_lat.append(distance_lat)
+                list_lon.append(distance_lon)
 
         average_lat = sum(list_lat)/len(list_lat)
         average_lon = sum(list_lon)/len(list_lon)
@@ -161,7 +156,7 @@ class TileGraph():
                 self.set_coordinates(myself, nbs)
 
     def set_positive_coordinates(self):
-        """shift the coordinates into the positive real to make
+        """shift the coordinates into the positive realm to make
         the tiles easy to draw"""
 
         #find the smallest possible value for x and y
@@ -191,11 +186,10 @@ class TileGraph():
             if "dummy" not in tile["name"]:
                 image = pimage.open(self.tiles_folder.joinpath(tile["name"]), 'r')
             else:
-                image = pimage.new(mode='RGBA', size=(self.tile_dim,self.tile_dim),color='grey')
+                image = pimage.new(mode='RGBA', size=(self.tile_dim,self.tile_dim),color=(200, 250, 204))
             X = tile["X"]
             Y = tile["Y"]
             target_img.paste(image, (X*self.tile_dim, Y*self.tile_dim))
-            print(_, tile["name"], X, Y)
 
         z = str(self.tile_dic["0"]["zoom"])
         if name is None:
@@ -251,8 +245,13 @@ class TileGraph():
         Graph.add_edge(node[0], wd, orientation="West")
 
     def find_edges(self, Graph:nx.DiGraph=None):
+        """Draw Edges between neighbouring nodes"""
         for home in Graph.nodes.items():
             for neighbor in Graph.nodes.items():
+                """Don't draw edges to themselve
+                Don't draw edges between two dummy nodes
+                They have a zero value in a one of their dimensions
+                """
                 if home != neighbor and not ("dummy" in home[1]["name"] and "dummy" in neighbor[1]["name"]):
                     if (home[1]["north"] == neighbor[1]["south"])\
                         and ((home[1]["east"] == neighbor[1]["east"])
@@ -271,6 +270,12 @@ class TileGraph():
                         and ((home[1]["north"] == neighbor[1]["north"])
                             or (home[1]["south"] == neighbor[1]["south"])):
                             Graph.add_edge(neighbor[0], home[0], orientation="West")
+    
+    def delete_one_way_dummies(self,Graph):
+        for node in copy.deepcopy(Graph.nodes.items()):
+            if Graph.degree[node[0]]<=2 and "dummy" in node[1]["name"]:
+                self.tile_dic.pop(node[0])
+                Graph.remove_node(node[0])
 
 if __name__ == "__main__":
     TG  = TileGraph(Path.home().joinpath(r"Documents\gps\tiles"))   
