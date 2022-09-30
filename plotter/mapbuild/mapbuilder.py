@@ -1,6 +1,6 @@
 """Loads the tiles, builds a graph and generates and image with the tiles"""
 import networkx as nx
-import os
+import os, copy
 from PIL import Image as pimage
 from matplotlib import pyplot as plt
 if __name__ == '__main__':
@@ -82,9 +82,11 @@ class TileGraph():
                             Graph.add_edge(neighbor[0], home[0], orientation="West")
 
         #create dummy tiles for tiles that have no orthoginal neigbours, but hopefully diagonal neigbours
-        for node in Graph.nodes.items():
+        gni = copy.deepcopy(Graph.nodes.items())
+        for node in gni:
             if Graph.degree[node[0]]==0:
                 self.set_dummies(node, Graph)
+        self.find_edges_to_dummies(Graph)
         # The module can be used alone
         # This part is mainly for debugging
         if __name__ == "__main__":
@@ -186,10 +188,14 @@ class TileGraph():
         
         #draw every single tile
         for _, tile in self.tile_dic.items():
-            image = pimage.open(self.tiles_folder.joinpath(tile["name"]), 'r')
+            if "dummy" not in tile["name"]:
+                image = pimage.open(self.tiles_folder.joinpath(tile["name"]), 'r')
+            else:
+                image = pimage.new(mode='RGBA', size=(self.tile_dim,self.tile_dim),color='grey')
             X = tile["X"]
             Y = tile["Y"]
             target_img.paste(image, (X*self.tile_dim, Y*self.tile_dim))
+            print(_, tile["name"], X, Y)
 
         z = str(self.tile_dic["0"]["zoom"])
         if name is None:
@@ -219,29 +225,52 @@ class TileGraph():
         _w = node[1]["west"]
         _e = node[1]["east"]
         _z = node[1]["zoom"]
-        north_dummy = {_ele+1 : {"south": _n, "north": _n, "west": _w, "east": _e, "zoom": _z}}
-        south_dummy = {_ele+2 : {"north": _s, "south": _s, "west": _w, "east": _e, "zoom": _z}}
-        east_dummy = {_ele+3 : {"south": _s, "north": _n, "west": _e, "east": _e, "zoom": _z}}
-        west_dummy = {_ele+4 : {"south": _s, "north": _n, "west": _w, "east": _w, "zoom": _z}}
+        nd, sd, ed, wd = str(_ele+1), str(_ele+2), str(_ele+3), str(_ele+4)
+
+        north_dummy = {nd : {"zoom": _z, "south": _n, "north": _n, "west": _w, "east": _e, "name": "dummy north"}}
+        south_dummy = {sd : {"zoom": _z, "north": _s, "south": _s, "west": _w, "east": _e, "name": "dummy south"}}
+        east_dummy = {ed : {"zoom": _z, "south": _s, "north": _n, "west": _e, "east": _e, "name": "dummy east"}}
+        west_dummy = {wd : {"zoom": _z, "south": _s, "north": _n, "west": _w, "east": _w, "name": "dummy west"}}
         self.tile_dic.update(north_dummy)
         self.tile_dic.update(south_dummy)
         self.tile_dic.update(east_dummy)
         self.tile_dic.update(west_dummy)
-        Graph.add_nodes_from([_ele+1, _ele+2, _ele+3, _ele+4])
+        Graph.add_nodes_from([nd, sd, ed, wd])
         nx.set_node_attributes(Graph, self.tile_dic)
 
-        Graph.add_edge(_ele+1, node[0], orientation="South")
-        Graph.add_edge(node[0], _ele+1, orientation="North")
+        Graph.add_edge(nd, node[0], orientation="South")
+        Graph.add_edge(node[0],nd, orientation="North")
 
-        Graph.add_edge(_ele+2, node[0], orientation="North")
-        Graph.add_edge(node[0], _ele+2, orientation="South")
+        Graph.add_edge(sd, node[0], orientation="North")
+        Graph.add_edge(node[0], sd, orientation="South")
 
-        Graph.add_edge(_ele+3, node[0], orientation="West")
-        Graph.add_edge(node[0], _ele+3, orientation="East")
+        Graph.add_edge(ed, node[0], orientation="West")
+        Graph.add_edge(node[0], ed, orientation="East")
 
-        Graph.add_edge(_ele+4, node[0], orientation="East")
-        Graph.add_edge(node[0], _ele+4, orientation="West")
+        Graph.add_edge(wd, node[0], orientation="East")
+        Graph.add_edge(node[0], wd, orientation="West")
 
+    def find_edges(self, Graph:nx.DiGraph=None):
+        for home in Graph.nodes.items():
+            for neighbor in Graph.nodes.items():
+                if home != neighbor and not ("dummy" in home[1]["name"] and "dummy" in neighbor[1]["name"]):
+                    if (home[1]["north"] == neighbor[1]["south"])\
+                        and ((home[1]["east"] == neighbor[1]["east"])
+                            or (home[1]["west"] == neighbor[1]["west"])):
+                            Graph.add_edge(neighbor[0], home[0], orientation="South")
+                    if (home[1]["south"] == neighbor[1]["north"])\
+                        and ((home[1]["east"] == neighbor[1]["east"])
+                            or (home[1]["west"] == neighbor[1]["west"])):
+                            Graph.add_edge(neighbor[0], home[0], orientation="North")
+                    
+                    if (home[1]["west"] == neighbor[1]["east"])\
+                        and ((home[1]["north"] == neighbor[1]["north"])
+                            or (home[1]["south"] == neighbor[1]["south"])):
+                            Graph.add_edge(neighbor[0], home[0], orientation="East")
+                    if (home[1]["east"] == neighbor[1]["west"])\
+                        and ((home[1]["north"] == neighbor[1]["north"])
+                            or (home[1]["south"] == neighbor[1]["south"])):
+                            Graph.add_edge(neighbor[0], home[0], orientation="West")
 
 if __name__ == "__main__":
     TG  = TileGraph(Path.home().joinpath(r"Documents\gps\tiles"))   
