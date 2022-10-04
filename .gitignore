@@ -160,3 +160,10 @@ cython_debug/
 #.idea/
 plotter/server/temp_data/
 plotter/client/temp_data/
+
+
+#dockerstuff
+#dockerfile
+docker
+#workdir
+app/
