@@ -28,7 +28,7 @@ def load_all_tiles(tile_list:list[tuple], zoom:int=15)->None:
         north, west, south, east = [round(x, 5) for x in [north, west, south, east]]
 
         #get the single tile based on the center point to allow maximum zoom
-        mao = sm.Map(lat, lon, z=zoom)
+        mao = sm.Map(lat, lon, z=zoom """,tileserver='http://a.tile.thunderforest.com/cycle/{z}/{x}/{y}.png' """)
         #save the tile with the boudaries and zoom
         mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
 
@@ -104,11 +104,12 @@ def plot_my_mapbuilder(only_location:tuple = None, df:pd.DataFrame = None)->None
 if __name__ == "__main__":
     #read gps data from file and
     # filter to only get latitude and longitude
+    zoom = 15
     df = pd.read_csv(md.last_will, sep=',')
     only_location = tuple(zip(df['lat'],df['lon']))
-    unique_tiles = detailed_tiles(only_location, zoom=15)
+    unique_tiles = detailed_tiles(only_location, zoom=zoom)
     #download all tiles if not yet downloaded
-    load_all_tiles(unique_tiles, zoom=15)
+    load_all_tiles(unique_tiles, zoom=zoom)
     
     #plot a path within a single tile
     #plot_my_path(only_location, df)
