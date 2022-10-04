@@ -28,7 +28,8 @@ def load_all_tiles(tile_list:list[tuple], zoom:int=15)->None:
         north, west, south, east = [round(x, 5) for x in [north, west, south, east]]
 
         #get the single tile based on the center point to allow maximum zoom
-        mao = sm.Map(lat, lon, z=zoom """,tileserver='http://a.tile.thunderforest.com/cycle/{z}/{x}/{y}.png' """)
+        mao = sm.Map(lat, lon, z=zoom)
+        """,tileserver='http://a.tile.thunderforest.com/cycle/{z}/{x}/{y}.png' """
         #save the tile with the boudaries and zoom
         mao.save_png(md.tiles_folder.joinpath(f"Tile_{i}_{zoom}_{north}_{west}_{south}_{east}.png"))
 
