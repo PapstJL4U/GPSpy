@@ -5,4 +5,7 @@ import server.server  as serv
 if __name__ == "__main__":
     print("Hello World!")
     print("Starting Server!")
-    tile_server = serv.start(windows=True)
+    if platform.system() == "Windows":
+        tile_server = serv.start(windows=True)
+    else:
+        tile_server = serv.start(windows=False)

@@ -144,7 +144,11 @@ def cleanup(all=False):
 
 def start(windows:bool=False):
     
-    run(app, host='localhost', port=21812)
+    if windows:
+        run(app, host='localhost', port=21812)
+    else:
+        #We guess we are in a docker container
+        run(app, host='0.0.0.0', port=21812)
 
     logger.info("Current Working Directory: "+os.getcwd())
     logger.info("Save Location: "+save_location)
