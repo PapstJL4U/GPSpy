@@ -142,7 +142,7 @@ def cleanup(all=False):
                 logger.info("Deleting: "+file.name)
                 os.remove(file)
 
-def start(windows:bool=False):
+def start():
     
     run(app, host='localhost', port=21812)
 
