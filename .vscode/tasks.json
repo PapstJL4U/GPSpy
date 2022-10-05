@@ -7,8 +7,8 @@
 			"platform": "python",
 			"dockerBuild": {
 				"tag": "gpspy:latest",
-				"dockerfile": "${workspaceFolder}/Dockerfile",
-				"context": "${workspaceFolder}",
+				"dockerfile": "${workspaceFolder}/plotter/Dockerfile",
+				"context": "${workspaceFolder}/plotter",
 				"pull": true
 			}
 		},
@@ -19,7 +19,7 @@
 				"docker-build"
 			],
 			"python": {
-				"file": "plotter\\server_controller.py"
+				"file": "plotter/server_controller.py"
 			}
 		}
 	]

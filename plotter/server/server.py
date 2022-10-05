@@ -8,9 +8,13 @@ else:
 
 app = Bottle()
 home:str = os.getcwd()
-save_location:str = os.path.join(home,"plotter", "server", "temp_data")
+#save_location:str = os.path.join(home,"plotter", "server", "temp_data")
+save_location:str = os.path.join(home,"server", "temp_data")
+
 logging.basicConfig(filename='server.log', encoding='utf-8', level=logging.INFO)
 logger = logging.getLogger(name="server")
+logger.info("home: "+home)
+logger.info("save_location:"+save_location)
 
 @app.route('/')
 @app.route('/hello')
@@ -50,7 +54,7 @@ def send_static(filename):
 @app.route('/gps/simple', method='POST')
 def do_upload():
     """The method used to display gps data in a single tile map."""
-    logger.debug("Processing gps for simple map")
+    logger.info("Processing gps for simple map")
     
     #retrieves exact file path to gps file
     save_path = all_upload() 
@@ -67,7 +71,7 @@ def do_upload():
 @app.route('/gps/complex', method='POST')
 def do_upload():
     """The method used to display gps data with the maximum zoom level on multiple tiles"""
-    logger.debug("Processing gps for complex map")
+    logger.info("Processing gps for complex map")
 
     #retrieves exact file path to gps file
     save_path = all_upload()
@@ -138,10 +142,15 @@ def cleanup(all=False):
                 #remove everything for a clean space
                 logger.info("Deleting: "+file.name)
                 os.remove(file)
-def start():
+
+def start(windows:bool=False):
+    
+    if windows:
+        run(app, host='localhost', port=21812)
+        global save_location 
+        save_location = os.path.join(home,"plotter", "server", "temp_data")
+    else:
+        run(app, host='0.0.0.0', port=21812)
+
     logger.info("Current Working Directory: "+os.getcwd())
     logger.info("Save Location: "+save_location)
-    run(app, host='localhost', port=21812)
-
-if __name__ == '__main__':
-    start()
