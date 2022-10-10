@@ -1,6 +1,8 @@
 """All work done in this file by https://stackoverflow.com/users/6600974/kcoskun
 here  https://stackoverflow.com/a/70245742
 """
+
+
 def my_draw_networkx_edge_labels(
     G,
     pos,
@@ -17,7 +19,7 @@ def my_draw_networkx_edge_labels(
     ax=None,
     rotate=True,
     clip_on=True,
-    rad=0
+    rad=0,
 ):
     """Draw edge labels.
 
@@ -111,13 +113,13 @@ def my_draw_networkx_edge_labels(
         )
         pos_1 = ax.transData.transform(np.array(pos[n1]))
         pos_2 = ax.transData.transform(np.array(pos[n2]))
-        linear_mid = 0.5*pos_1 + 0.5*pos_2
+        linear_mid = 0.5 * pos_1 + 0.5 * pos_2
         d_pos = pos_2 - pos_1
-        rotation_matrix = np.array([(0,1), (-1,0)])
-        ctrl_1 = linear_mid + rad*rotation_matrix@d_pos
-        ctrl_mid_1 = 0.5*pos_1 + 0.5*ctrl_1
-        ctrl_mid_2 = 0.5*pos_2 + 0.5*ctrl_1
-        bezier_mid = 0.5*ctrl_mid_1 + 0.5*ctrl_mid_2
+        rotation_matrix = np.array([(0, 1), (-1, 0)])
+        ctrl_1 = linear_mid + rad * rotation_matrix @ d_pos
+        ctrl_mid_1 = 0.5 * pos_1 + 0.5 * ctrl_1
+        ctrl_mid_2 = 0.5 * pos_2 + 0.5 * ctrl_1
+        bezier_mid = 0.5 * ctrl_mid_1 + 0.5 * ctrl_mid_2
         (x, y) = ax.transData.inverted().transform(bezier_mid)
 
         if rotate:
