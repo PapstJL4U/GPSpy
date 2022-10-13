@@ -241,7 +241,7 @@ class TileGraph:
         lat, lon = lat_lon
         zoom = self.zoom
         x, y = deg2num(lat, lon, zoom=zoom, do_round=False)
-        xx, yy = deg2num(self.min_lat, self.min_lon, zoom=zoom, do_round=False)
+        # xx, yy = deg2num(self.min_lat, self.min_lon, zoom=zoom, do_round=False)
         px = abs(x - self.min_x) * self.tile_dim
         py = abs(y - self.min_y) * self.tile_dim
 
@@ -316,8 +316,9 @@ class TileGraph:
         Graph.add_edge(wd, node[0], orientation="East")
         Graph.add_edge(node[0], wd, orientation="West")
 
-    def find_edges(self, Graph: nx.DiGraph = None):
-        """Draw Edges between neighbouring nodes"""
+    def find_edges(self, Graph: nx.DiGraph = None) -> None:
+        """Draw Edges between neighbouring nodes
+        Works directly on the Graph object"""
         for home in Graph.nodes.items():
             for neighbor in Graph.nodes.items():
                 """Don't draw edges to themselve
@@ -349,7 +350,8 @@ class TileGraph:
                     ):
                         Graph.add_edge(neighbor[0], home[0], orientation="West")
 
-    def delete_one_way_dummies(self, Graph):
+    def delete_one_way_dummies(self, Graph) -> None:
+        "Dummies that do not connect other tiles get deleted"
         for node in copy.deepcopy(Graph.nodes.items()):
             if Graph.degree[node[0]] <= 2 and "dummy" in node[1]["name"]:
                 self.tile_dic.pop(node[0])
