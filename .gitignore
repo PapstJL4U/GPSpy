@@ -162,7 +162,5 @@ temp_data/
 
 #dockerstuff
 #dockerfile
-docker
-*docker*
 #workdir
 app/
