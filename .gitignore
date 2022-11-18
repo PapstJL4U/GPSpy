@@ -163,7 +163,6 @@ temp_data/
 #dockerstuff
 #dockerfile
 docker
-Dockerfile
 *docker*
 #workdir
 app/
